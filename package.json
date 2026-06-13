@@ -65,11 +65,21 @@
     "win": {
       "icon": "build/icon.ico",
       "target": [
-        "nsis"
+        {
+          "target": "nsis",
+          "arch": ["x64", "arm64"]
+        }
       ],
       "files": [
         "!**/node_modules/ffprobe-static/bin/darwin/**"
       ]
+    },
+    "nsis": {
+      "oneClick": false,
+      "allowToChangeInstallationDirectory": true,
+      "createDesktopShortcut": true,
+      "createStartMenuShortcut": true,
+      "shortcutName": "Unstunted Editor"
     }
   }
 }
