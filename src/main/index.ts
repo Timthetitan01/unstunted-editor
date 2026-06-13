@@ -4,6 +4,7 @@ import { createReadStream } from 'node:fs'
 import { stat } from 'node:fs/promises'
 import { Readable } from 'node:stream'
 import { registerIpc } from './ipc'
+import { ensureWindowsFFmpeg } from './setup'
 import { MEDIA_SCHEME } from '../shared/types'
 
 const isDev = !!process.env['ELECTRON_RENDERER_URL']
@@ -113,7 +114,8 @@ function createWindow(): void {
   }
 }
 
-app.whenReady().then(() => {
+app.whenReady().then(async () => {
+  await ensureWindowsFFmpeg()
   registerMediaProtocol()
   registerIpc()
   createWindow()

@@ -74,7 +74,7 @@ function emptyProject(): Project {
     name: 'Untitled',
     width: 1080,
     height: 1920,
-    fps: 30,
+    fps: 60,
     sampleRate: 48000,
     background: '#000000',
     captions: [],

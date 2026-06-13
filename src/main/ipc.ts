@@ -3,7 +3,7 @@ import { writeFile, readFile, mkdir } from 'node:fs/promises'
 import { spawn } from 'node:child_process'
 import { createHash } from 'node:crypto'
 import { join } from 'node:path'
-import { probe, thumbnail, filmstrip, run, FFMPEG_PATH } from './ffmpeg'
+import { probe, thumbnail, filmstrip, run, getFFmpegPath } from './ffmpeg'
 import { registerExportIpc } from './export'
 import { MEDIA_SCHEME } from '../shared/types'
 
@@ -73,7 +73,7 @@ export function registerIpc(): void {
     const chunks: Buffer[] = []
     await new Promise<void>((resolve, reject) => {
       const child = spawn(
-        FFMPEG_PATH,
+        getFFmpegPath(),
         ['-i', path, '-ac', '1', '-ar', '16000', '-f', 'f32le', '-acodec', 'pcm_f32le', 'pipe:1'],
         { windowsHide: true }
       )
@@ -151,5 +151,5 @@ export function registerIpc(): void {
   })
 
   // Lightweight ffmpeg passthrough used by a couple of UI affordances.
-  ipcMain.handle('ffmpeg:run', async (_e, args: string[]) => run(FFMPEG_PATH, args))
+  ipcMain.handle('ffmpeg:run', async (_e, args: string[]) => run(getFFmpegPath(), args))
 }

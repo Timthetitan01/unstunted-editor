@@ -3,13 +3,21 @@ import ffmpegStatic from 'ffmpeg-static'
 import ffprobeStatic from 'ffprobe-static'
 import type { ProbeResult, MediaKind } from '../shared/types'
 
-// ffmpeg-static / ffprobe-static resolve to a bundled binary path per-platform.
-// Inside a packaged app the path lives under app.asar.unpacked, so rewrite it.
 function unpacked(p: string): string {
   return p.replace('app.asar', 'app.asar.unpacked')
 }
 
-export const FFMPEG_PATH = unpacked((ffmpegStatic as unknown as string) || 'ffmpeg')
+// On Windows, ffmpeg-static only ships a binary for the platform that ran
+// npm install (macOS in our cross-compile workflow). setup.ts downloads the
+// Windows binary on first launch and writes its path to SWIFTCUT_FFMPEG.
+// All callers go through getFFmpegPath() so they pick up the resolved value.
+export function getFFmpegPath(): string {
+  if (process.env['SWIFTCUT_FFMPEG']) return process.env['SWIFTCUT_FFMPEG']
+  const fromStatic = ffmpegStatic as unknown as string | null
+  if (fromStatic) return unpacked(fromStatic)
+  return 'ffmpeg'
+}
+
 export const FFPROBE_PATH = unpacked(ffprobeStatic.path || 'ffprobe')
 
 export interface RunResult {
@@ -83,7 +91,7 @@ export async function filmstrip(
   const fps = frames / duration
   const { stdout } = await new Promise<{ stdout: Buffer }>((resolve, reject) => {
     const child = spawn(
-      FFMPEG_PATH,
+      getFFmpegPath(),
       [
         '-i', path,
         '-frames:v', '1',
@@ -108,7 +116,7 @@ export async function filmstrip(
 export async function thumbnail(path: string, time = 0.5, width = 240): Promise<string> {
   const { stdout } = await new Promise<{ stdout: Buffer }>((resolve, reject) => {
     const child = spawn(
-      FFMPEG_PATH,
+      getFFmpegPath(),
       [
         '-ss', String(time),
         '-i', path,

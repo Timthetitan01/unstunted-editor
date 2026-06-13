@@ -4,7 +4,7 @@ import { writeFile, unlink } from 'node:fs/promises'
 import { tmpdir } from 'node:os'
 import { join } from 'node:path'
 import { randomUUID } from 'node:crypto'
-import { FFMPEG_PATH } from './ffmpeg'
+import { getFFmpegPath } from './ffmpeg'
 
 // The renderer drives export by streaming raw RGBA frames (project fps) plus a
 // mixed-audio WAV. We pipe frames straight into ffmpeg's stdin as rawvideo and
@@ -63,7 +63,7 @@ export function registerExportIpc(): void {
     if (wavPath) args.push('-c:a', 'aac', '-b:a', '192k', '-shortest')
     args.push('-r', String(opts.fps), opts.outputPath)
 
-    const ff = spawn(FFMPEG_PATH, args, { windowsHide: true })
+    const ff = spawn(getFFmpegPath(), args, { windowsHide: true })
     const session: Session = {
       ff,
       wavPath,
